@@ -26,6 +26,9 @@ namespace PlayerController.InputController
         #region Horizontal Axis Events
         private AxisEvent delegateHorizontalAxisEvent;
         #endregion Horizontal Axis Events
+        #region Vertical Axis Events
+        private AxisEvent delegateVerticalAxisEvent;
+        #endregion Vertical Axis Events
 
 
         // Use this for initialization
@@ -89,6 +92,10 @@ namespace PlayerController.InputController
             {
                 delegateHorizontalAxisEvent(Input.GetAxis(AxisInputConstants.HORIZONTAL.ToString()));
             }
+            if (delegateVerticalAxisEvent != null)
+            {
+                delegateVerticalAxisEvent(Input.GetAxis(AxisInputConstants.VERTICAL.ToString()));
+            }
         }
 
         public void BindAxis(AxisInputConstants axisConstant, AxisEvent delegateEvent)
@@ -96,6 +103,10 @@ namespace PlayerController.InputController
             if (axisConstant == AxisInputConstants.HORIZONTAL)
             {
                 delegateHorizontalAxisEvent += delegateEvent;
+            }
+            else if (axisConstant == AxisInputConstants.VERTICAL)
+            {
+                delegateVerticalAxisEvent += delegateEvent;
             }
         }
 
