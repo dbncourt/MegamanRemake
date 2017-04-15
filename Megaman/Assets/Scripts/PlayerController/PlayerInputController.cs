@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace PlayerController.InputController
 {
-    public class InputPlayerController : MonoBehaviour
+    public class PlayerInputController : MonoBehaviour
     {
         public enum KeyStatus
         {
@@ -99,7 +99,7 @@ namespace PlayerController.InputController
             }
         }
 
-        public void BindAction(ActionInputConstants actionConstant, ActionEvent delegateEvent, InputPlayerController.KeyStatus keyStatus)
+        public void BindAction(ActionInputConstants actionConstant, ActionEvent delegateEvent, PlayerInputController.KeyStatus keyStatus)
         {
             if (actionConstant == ActionInputConstants.JUMP)
             {
