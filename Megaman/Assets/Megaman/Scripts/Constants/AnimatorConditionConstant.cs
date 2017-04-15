@@ -12,6 +12,6 @@ namespace Megaman.Constants
         public static readonly string JUMP = "Jump";
         public static readonly string Fall = "Fall";
         public static readonly string DASH = "Dash";
-        public static readonly string VELOCITY = "Velocity";
+        public static readonly string SPEED = "Speed";
     }
 }

@@ -81,7 +81,10 @@ namespace PlayerController.InputController
                     delegateDashPressedUp();
                 }
             }
+        }
 
+        void FixedUpdate()
+        {
             if (delegateHorizontalAxisEvent != null)
             {
                 delegateHorizontalAxisEvent(Input.GetAxis(AxisInputConstants.HORIZONTAL.ToString()));

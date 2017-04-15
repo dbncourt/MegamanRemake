@@ -5,12 +5,22 @@ using System.Collections;
 
 public class CharacterMovementController : MonoBehaviour
 {
+    [Range(1.0f, 5.0f)]
+    public float maxSpeed;
+    public bool facingRight;
 
     private Animator characterAnimator;
     private SpriteRenderer spriteRenderer;
+    private new Rigidbody2D rigidbody2D;
 
     private int idleFrameThresholdCounter;
     private bool isRunStartPlaying;
+
+    public CharacterMovementController()
+    {
+        maxSpeed = 10.0f;
+        facingRight = true;
+    }
 
     void Start()
     {
@@ -37,6 +47,12 @@ public class CharacterMovementController : MonoBehaviour
         {
             Debug.LogError("SpriteRenderer not found");
         }
+
+        rigidbody2D = GetComponent<Rigidbody2D>();
+        if (rigidbody2D == null)
+        {
+            Debug.LogError("Rigidbody2D not found");
+        }
     }
 
     void Update()
@@ -45,42 +61,17 @@ public class CharacterMovementController : MonoBehaviour
 
     private void Run(float value)
     {
-        if (value > 0.0f)
+        rigidbody2D.velocity = new Vector2(value * maxSpeed, rigidbody2D.velocity.y);
+        if (value > 0.0f && spriteRenderer.flipX)
         {
-            value = 1.0f;
             spriteRenderer.flipX = false;
-            idleFrameThresholdCounter = 0;
-            characterAnimator.SetBool(AnimatorConditionConstant.RUN, true);
         }
-        else if (value < 0.0f)
+        else if (value < 0.0f && !spriteRenderer.flipX)
         {
-            value = -1.0f;
             spriteRenderer.flipX = true;
-            idleFrameThresholdCounter = 0;
-            characterAnimator.SetBool(AnimatorConditionConstant.RUN, true);
-        }
-        else
-        {
-            if (idleFrameThresholdCounter == 3)
-            {
-                characterAnimator.SetBool(AnimatorConditionConstant.RUN, false);
-                idleFrameThresholdCounter = 0;
-            }
-            else
-            {
-                ++idleFrameThresholdCounter;
-            }
         }
 
-        if (isRunStartPlaying)
-        {
-            value *= (Time.deltaTime / 2.0f);
-        }
-        else
-        {
-            value *= Time.deltaTime;
-        }
-        transform.Translate(value, 0.0f, 0.0f);
+        characterAnimator.SetFloat(AnimatorConditionConstant.SPEED, Mathf.Abs(value));
     }
 
     private void NotifyRunStartFinished()
