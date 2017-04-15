@@ -46,6 +46,7 @@ public class MegamanCharacterMovementController : CharacterMovementController
     protected override void SetupInputController(PlayerInputController playerInputController)
     {
         playerInputController.BindAxis(AxisInputConstants.HORIZONTAL, Run);
+        playerInputController.BindAxis(AxisInputConstants.VERTICAL, Crouch);
         playerInputController.BindAction(ActionInputConstants.JUMP, JumpDown, PlayerInputController.KeyStatus.Down);
         playerInputController.BindAction(ActionInputConstants.JUMP, JumpPressed, PlayerInputController.KeyStatus.Pressed);
         playerInputController.BindAction(ActionInputConstants.JUMP, JumpUp, PlayerInputController.KeyStatus.Up);
@@ -72,7 +73,29 @@ public class MegamanCharacterMovementController : CharacterMovementController
 
     private void Run(float value)
     {
-        rigidbody2D.velocity = new Vector2(value * maxSpeed, rigidbody2D.velocity.y);
+        if (!animator.GetBool(AnimatorConditionConstant.CROUCH) || !IsGrounded)
+        {
+            rigidbody2D.velocity = new Vector2(value * maxSpeed, rigidbody2D.velocity.y);
+            animator.SetFloat(AnimatorConditionConstant.HORIZONTAL_SPEED, Mathf.Abs(value));
+        }
+
+        FlipSprite(value);
+    }
+
+    private void Crouch(float value)
+    {
+        if (value < 0.0f)
+        {
+            animator.SetBool(AnimatorConditionConstant.CROUCH, true);
+        }
+        else
+        {
+            animator.SetBool(AnimatorConditionConstant.CROUCH, false);
+        }
+    }
+
+    private void FlipSprite(float value)
+    {
         if (value > 0.0f && spriteRenderer.flipX)
         {
             spriteRenderer.flipX = false;
@@ -81,7 +104,5 @@ public class MegamanCharacterMovementController : CharacterMovementController
         {
             spriteRenderer.flipX = true;
         }
-
-        animator.SetFloat(AnimatorConditionConstant.HORIZONTAL_SPEED, Mathf.Abs(value));
     }
 }
