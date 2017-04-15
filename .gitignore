@@ -31,3 +31,5 @@ sysinfo.txt
 Megaman/Library/
 Megaman/obj/
 Megaman/Temp/
+*.trec
+*.camproj
