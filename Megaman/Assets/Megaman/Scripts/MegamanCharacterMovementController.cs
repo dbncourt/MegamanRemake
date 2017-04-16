@@ -7,15 +7,16 @@ using UnityEngine;
 
 public class MegamanCharacterMovementController : CharacterMovementController
 {
-
     private Animator animator;
     private SpriteRenderer spriteRenderer;
+
+    private bool isCrouch;
+    private bool isDash;
 
     public MegamanCharacterMovementController() : base()
     {
     }
 
-    // Use this for initialization
     private new void Start()
     {
         base.Start();
@@ -38,6 +39,11 @@ public class MegamanCharacterMovementController : CharacterMovementController
         animator.SetBool(AnimatorConditionConstant.IS_GROUNDED, IsGrounded);
     }
 
+    private new void FixedUpdate()
+    {
+        base.FixedUpdate();
+    }
+
     protected override void OnFalling()
     {
         animator.SetTrigger(AnimatorConditionConstant.FALL);
@@ -50,6 +56,7 @@ public class MegamanCharacterMovementController : CharacterMovementController
         playerInputController.BindAction(ActionInputConstants.JUMP, JumpDown, PlayerInputController.KeyStatus.Down);
         playerInputController.BindAction(ActionInputConstants.JUMP, JumpPressed, PlayerInputController.KeyStatus.Pressed);
         playerInputController.BindAction(ActionInputConstants.JUMP, JumpUp, PlayerInputController.KeyStatus.Up);
+        playerInputController.BindAction(ActionInputConstants.DASH, Dash, PlayerInputController.KeyStatus.Down);
     }
 
     private void JumpDown()
@@ -73,10 +80,20 @@ public class MegamanCharacterMovementController : CharacterMovementController
 
     private void Run(float value)
     {
-        if (!animator.GetBool(AnimatorConditionConstant.CROUCH) || !IsGrounded)
+        if (isDash)
+        {
+            float multiplier = spriteRenderer.flipX ? -1.0f : 1.0f;
+            rigidbody2D.velocity = new Vector2(multiplier * 2.0f * maxSpeed, rigidbody2D.velocity.y);
+        }
+        else if (!isCrouch || !IsGrounded)
         {
             rigidbody2D.velocity = new Vector2(value * maxSpeed, rigidbody2D.velocity.y);
             animator.SetFloat(AnimatorConditionConstant.HORIZONTAL_SPEED, Mathf.Abs(value));
+        }
+        else
+        {
+            rigidbody2D.velocity = new Vector2(0.0f, rigidbody2D.velocity.y);
+            animator.SetFloat(AnimatorConditionConstant.HORIZONTAL_SPEED, Mathf.Abs(0.0f));
         }
 
         FlipSprite(value);
@@ -86,10 +103,12 @@ public class MegamanCharacterMovementController : CharacterMovementController
     {
         if (value < 0.0f)
         {
+            isCrouch = true;
             animator.SetBool(AnimatorConditionConstant.CROUCH, true);
         }
         else
         {
+            isCrouch = false;
             animator.SetBool(AnimatorConditionConstant.CROUCH, false);
         }
     }
@@ -104,5 +123,19 @@ public class MegamanCharacterMovementController : CharacterMovementController
         {
             spriteRenderer.flipX = true;
         }
+    }
+
+    private void Dash()
+    {
+        if (isGrounded)
+        {
+            isDash = true;
+            animator.SetTrigger(AnimatorConditionConstant.DASH);
+        }
+    }
+
+    public void NotifyDashEnd()
+    {
+        isDash = false;
     }
 }
