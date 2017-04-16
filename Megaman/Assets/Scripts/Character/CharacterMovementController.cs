@@ -77,7 +77,7 @@ public abstract class CharacterMovementController : MonoBehaviour
     {
     }
 
-    protected void OnLanded()
+    protected virtual void OnLanded()
     {
         isJumping = false;
     }

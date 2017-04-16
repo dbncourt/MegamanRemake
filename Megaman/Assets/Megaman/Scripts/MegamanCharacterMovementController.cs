@@ -10,11 +10,13 @@ public class MegamanCharacterMovementController : CharacterMovementController
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
-    private bool isCrouch;
-    private bool isDash;
+    private bool isCrouching;
+    private bool isDashing;
+    private bool isSpawning;
 
     public MegamanCharacterMovementController() : base()
     {
+        isSpawning = true;
     }
 
     private new void Start()
@@ -30,6 +32,16 @@ public class MegamanCharacterMovementController : CharacterMovementController
         if (spriteRenderer == null)
         {
             Debug.LogError("SpriteRenderer not found");
+        }
+
+        animator.speed = 0.0f;
+        PlayerInputController playerInputController = GetComponent<PlayerInputController>();
+        if(playerInputController != null)
+        {
+            playerInputController.enabled = false;
+        } else
+        {
+            Debug.LogError("PlayerInputController not found");
         }
     }
 
@@ -47,6 +59,15 @@ public class MegamanCharacterMovementController : CharacterMovementController
     protected override void OnFalling()
     {
         animator.SetTrigger(AnimatorConditionConstant.FALL);
+    }
+
+    protected override void OnLanded()
+    {
+        base.OnLanded();
+        if (isSpawning)
+        {
+            animator.speed = 1.0f;
+        }
     }
 
     protected override void SetupInputController(PlayerInputController playerInputController)
@@ -80,12 +101,12 @@ public class MegamanCharacterMovementController : CharacterMovementController
 
     private void Run(float value)
     {
-        if (isDash)
+        if (isDashing)
         {
             float multiplier = spriteRenderer.flipX ? -1.0f : 1.0f;
             rigidbody2D.velocity = new Vector2(multiplier * 2.0f * maxSpeed, rigidbody2D.velocity.y);
         }
-        else if (!isCrouch || !IsGrounded)
+        else if (!isCrouching || !IsGrounded)
         {
             rigidbody2D.velocity = new Vector2(value * maxSpeed, rigidbody2D.velocity.y);
             animator.SetFloat(AnimatorConditionConstant.HORIZONTAL_SPEED, Mathf.Abs(value));
@@ -103,12 +124,12 @@ public class MegamanCharacterMovementController : CharacterMovementController
     {
         if (value < 0.0f)
         {
-            isCrouch = true;
+            isCrouching = true;
             animator.SetBool(AnimatorConditionConstant.CROUCH, true);
         }
         else
         {
-            isCrouch = false;
+            isCrouching = false;
             animator.SetBool(AnimatorConditionConstant.CROUCH, false);
         }
     }
@@ -129,13 +150,19 @@ public class MegamanCharacterMovementController : CharacterMovementController
     {
         if (isGrounded)
         {
-            isDash = true;
+            isDashing = true;
             animator.SetTrigger(AnimatorConditionConstant.DASH);
         }
     }
 
     public void NotifyDashEnd()
     {
-        isDash = false;
+        isDashing = false;
+    }
+
+    public void NotifySpawnEnd()
+    {
+        PlayerInputController playerInputController = GetComponent<PlayerInputController>();
+        playerInputController.enabled = true;
     }
 }
