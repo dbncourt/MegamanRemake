@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 namespace Project.Physics
 {
@@ -25,7 +24,6 @@ namespace Project.Physics
             get { return _rayOrigins; }
         }
 
-        private LayerMask collisionMask;
         private BoxCollider2D boxCollider;
 
         private float skinWidth;
@@ -35,9 +33,8 @@ namespace Project.Physics
         private float _verticalRaySpacing;
         private RaycastOrigins _rayOrigins;
 
-        public RaycastController(ref LayerMask collisionMask, ref BoxCollider2D boxCollider, float skinWidth, ref int horizontalRayCount, ref int verticalRayCount)
+        public RaycastController(ref BoxCollider2D boxCollider, float skinWidth, ref int horizontalRayCount, ref int verticalRayCount)
         {
-            this.collisionMask = collisionMask;
             this.boxCollider = boxCollider;
             this.skinWidth = skinWidth;
             this.horizontalRayCount = horizontalRayCount;

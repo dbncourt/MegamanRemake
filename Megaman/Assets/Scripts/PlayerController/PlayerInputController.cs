@@ -1,159 +1,70 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace PlayerController.InputController
 {
     public class PlayerInputController : MonoBehaviour
     {
-        public enum KeyStatus
+        private Dictionary<string, Key> actionKeysMap;
+        private Dictionary<string, Axis> axisMap;
+
+        public PlayerInputController()
         {
-            Down,
-            Pressed,
-            Up
-        }
-        public delegate void ActionEvent();
-        public delegate void AxisEvent(float value);
-        #region Jump Action Events
-        private ActionEvent delegateJumpPressedDown;
-        private ActionEvent delegateJumpPressed;
-        private ActionEvent delegateJumpPressedUp;
-        #endregion Jump Action Events
-        #region Dash Action Events
-        private ActionEvent delegateDashPressedDown;
-        private ActionEvent delegateDashPressed;
-        private ActionEvent delegateDashPressedUp;
-        #endregion Dash Action Events
-        #region Horizontal Axis Events
-        private AxisEvent delegateHorizontalAxisEvent;
-        #endregion Horizontal Axis Events
-        #region Vertical Axis Events
-        private AxisEvent delegateVerticalAxisEvent;
-        #endregion Vertical Axis Events
-
-
-        // Use this for initialization
-        void Start()
-        {
-
+            actionKeysMap = new Dictionary<string, Key>();
+            axisMap = new Dictionary<string, Axis>();
         }
 
-        // Update is called once per frame
+        void Start() { }
+
         void Update()
         {
-            if (Input.GetButtonDown(ActionInputConstants.JUMP.ToString()))
+            foreach (KeyValuePair<string, Key> key in actionKeysMap)
             {
-                if (delegateJumpPressedDown != null)
-                {
-                    delegateJumpPressedDown();
-                }
-            }
-
-            if (Input.GetButton(ActionInputConstants.JUMP.ToString()))
-            {
-                if (delegateJumpPressed != null)
-                {
-                    delegateJumpPressed();
-                }
-            }
-            if (Input.GetButtonUp(ActionInputConstants.JUMP.ToString()))
-            {
-                if (delegateJumpPressedUp != null)
-                {
-                    delegateJumpPressedUp();
-                }
-            }
-
-            if (Input.GetButtonDown(ActionInputConstants.DASH.ToString()))
-            {
-                if (delegateDashPressedDown != null)
-                {
-                    delegateDashPressedDown();
-                }
-            }
-            if (Input.GetButton(ActionInputConstants.DASH.ToString()))
-            {
-                if (delegateDashPressed != null)
-                {
-                    delegateDashPressed();
-                }
-            }
-            if (Input.GetButtonUp(ActionInputConstants.DASH.ToString()))
-            {
-                if (delegateDashPressedUp != null)
-                {
-                    delegateDashPressedUp();
-                }
+                key.Value.EvaluateActionKey();
             }
         }
 
         void FixedUpdate()
         {
-            if (delegateHorizontalAxisEvent != null)
+            foreach (KeyValuePair<string, Axis> axis in axisMap)
             {
-                delegateHorizontalAxisEvent(Input.GetAxis(AxisInputConstants.HORIZONTAL.ToString()));
-            }
-            if (delegateVerticalAxisEvent != null)
-            {
-                delegateVerticalAxisEvent(Input.GetAxis(AxisInputConstants.VERTICAL.ToString()));
+                axis.Value.EvaluateAxisEvent();
             }
         }
 
-        public void BindAxis(AxisInputConstants axisConstant, AxisEvent delegateEvent)
+        public void BindAction(ActionInputConstants actionName, Key.ActionEvent eventMethod, Key.EKeyStatus keyStatus)
         {
-            if (axisConstant == AxisInputConstants.HORIZONTAL)
+            Key key;
+            try
             {
-                delegateHorizontalAxisEvent += delegateEvent;
+                key = actionKeysMap[actionName.ToString()];
             }
-            else if (axisConstant == AxisInputConstants.VERTICAL)
+            catch (KeyNotFoundException)
             {
-                delegateVerticalAxisEvent += delegateEvent;
+                key = new Key(actionName.ToString());
+                actionKeysMap.Add(actionName.ToString(), key);
             }
+            key.BindAction(eventMethod, keyStatus);
         }
 
-        public void BindAction(ActionInputConstants actionConstant, ActionEvent delegateEvent, PlayerInputController.KeyStatus keyStatus)
+        public void BindAxis(AxisInputConstants axisName, Axis.AxisEvent axisEvent)
         {
-            if (actionConstant == ActionInputConstants.JUMP)
+            Axis axis;
+            try
             {
-                switch (keyStatus)
-                {
-                    case KeyStatus.Down:
-                        {
-                            delegateJumpPressedDown += delegateEvent;
-                            break;
-                        }
-                    case KeyStatus.Pressed:
-                        {
-                            delegateJumpPressed += delegateEvent;
-                            break;
-                        }
-                    case KeyStatus.Up:
-                        {
-                            delegateJumpPressedUp += delegateEvent;
-                            break;
-                        }
-                }
+                axis = axisMap[axisName.ToString()];
             }
-            else if (actionConstant == ActionInputConstants.DASH)
+            catch (KeyNotFoundException)
             {
-                switch (keyStatus)
-                {
-                    case KeyStatus.Down:
-                        {
-                            delegateDashPressedDown += delegateEvent;
-                            break;
-                        }
-                    case KeyStatus.Pressed:
-                        {
-                            delegateDashPressed += delegateEvent;
-                            break;
-                        }
-                    case KeyStatus.Up:
-                        {
-                            delegateDashPressedUp += delegateEvent;
-                            break;
-                        }
-                }
+                axis = new Axis(axisName.ToString());
+                axisMap.Add(axisName.ToString(), axis);
             }
+            axis.BindAxis(axisEvent);
         }
+
+        public Key.KeyStatus QueryInputKeyStatus(string keyName)
+        {
+            return actionKeysMap[keyName].inputKeyStatus;
+        }        
     }
 }

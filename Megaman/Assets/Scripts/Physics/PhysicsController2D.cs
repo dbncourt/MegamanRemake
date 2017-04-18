@@ -48,29 +48,33 @@ namespace Project.Physics
                 slopeAngle = 0;
             }
         }
-        protected CollisionInfo _collisionInfo;
+
+        protected CollisionInfo collisionInfo;
 
         public PhysicsController2D()
         {
             maxClimbAngle = 80.0f;
             maxDescendAngle = 80.0f;
+            skinWidth = 0.015f;
+            horizontalRayCount = 4;
+            verticalRayCount = 4;
         }
 
-        private void Start()
+        protected void Start()
         {
             boxCollider = GetComponent<BoxCollider2D>();
-            raycastController = new RaycastController(ref collisionMask, ref boxCollider, skinWidth, ref horizontalRayCount, ref verticalRayCount);
+            raycastController = new RaycastController(ref boxCollider, skinWidth, ref horizontalRayCount, ref verticalRayCount);
         }
 
-        public void Move(Vector3 velocity)
+        protected void Move(Vector3 velocity)
         {
             raycastController.UpdateRaycastOrigins();
-            _collisionInfo.Reset();
-            _collisionInfo.velocityOld = velocity;
+            collisionInfo.Reset();
+            collisionInfo.velocityOld = velocity;
 
             if (velocity.x != 0)
             {
-                _collisionInfo.isFacingRight = (Mathf.Sign(velocity.x) == 1);
+                collisionInfo.isFacingRight = (Mathf.Sign(velocity.x) == 1);
             }
 
             if (velocity.y < 0)
@@ -89,7 +93,7 @@ namespace Project.Physics
 
         private void EvaluateHorizontalCollisions(ref Vector3 velocity)
         {
-            float directionX = _collisionInfo.isFacingRight ? 1.0f : -1.0f;
+            float directionX = collisionInfo.isFacingRight ? 1.0f : -1.0f;
             float rayLength = Mathf.Abs(velocity.x) + skinWidth;
 
             if (Mathf.Abs(velocity.x) < skinWidth)
@@ -99,7 +103,7 @@ namespace Project.Physics
 
             for (int i = 0; i < horizontalRayCount; i++)
             {
-                Vector2 rayOrigin = (_collisionInfo.isFacingRight) ? raycastController.rayOrigins.bottomRight : raycastController.rayOrigins.bottomLeft;
+                Vector2 rayOrigin = (collisionInfo.isFacingRight) ? raycastController.rayOrigins.bottomRight : raycastController.rayOrigins.bottomLeft;
                 rayOrigin += Vector2.up * (raycastController.horizontalRaySpacing * i);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
 
@@ -117,13 +121,13 @@ namespace Project.Physics
 
                     if (i == 0 && slopeAngle <= maxClimbAngle)
                     {
-                        if (_collisionInfo.descendingSlope)
+                        if (collisionInfo.descendingSlope)
                         {
-                            _collisionInfo.descendingSlope = false;
-                            velocity = _collisionInfo.velocityOld;
+                            collisionInfo.descendingSlope = false;
+                            velocity = collisionInfo.velocityOld;
                         }
                         float distanceToSlopeStart = 0;
-                        if (slopeAngle != _collisionInfo.slopeAngleOld)
+                        if (slopeAngle != collisionInfo.slopeAngleOld)
                         {
                             distanceToSlopeStart = hit.distance - skinWidth;
                             velocity.x -= distanceToSlopeStart * directionX;
@@ -132,18 +136,18 @@ namespace Project.Physics
                         velocity.x += distanceToSlopeStart * directionX;
                     }
 
-                    if (!_collisionInfo.climbingSlope || slopeAngle > maxClimbAngle)
+                    if (!collisionInfo.climbingSlope || slopeAngle > maxClimbAngle)
                     {
                         velocity.x = (hit.distance - skinWidth) * directionX;
                         rayLength = hit.distance;
 
-                        if (_collisionInfo.climbingSlope)
+                        if (collisionInfo.climbingSlope)
                         {
-                            velocity.y = Mathf.Tan(_collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(velocity.x);
+                            velocity.y = Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(velocity.x);
                         }
 
-                        _collisionInfo.left = directionX == -1;
-                        _collisionInfo.right = directionX == 1;
+                        collisionInfo.left = directionX == -1;
+                        collisionInfo.right = directionX == 1;
                     }
                 }
             }
@@ -169,17 +173,17 @@ namespace Project.Physics
                     velocity.y = (hit.distance - skinWidth) * directionY;
                     rayLength = hit.distance;
 
-                    if (_collisionInfo.climbingSlope)
+                    if (collisionInfo.climbingSlope)
                     {
-                        velocity.x = velocity.y / Mathf.Tan(_collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
+                        velocity.x = velocity.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
                     }
 
-                    _collisionInfo.below = directionY == -1;
-                    _collisionInfo.above = directionY == 1;
+                    collisionInfo.below = directionY == -1;
+                    collisionInfo.above = directionY == 1;
                 }
             }
 
-            if (_collisionInfo.climbingSlope)
+            if (collisionInfo.climbingSlope)
             {
                 float directionX = Mathf.Sign(velocity.x);
                 rayLength = Mathf.Abs(velocity.x) + skinWidth;
@@ -189,10 +193,10 @@ namespace Project.Physics
                 if (hit)
                 {
                     float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-                    if (slopeAngle != _collisionInfo.slopeAngle)
+                    if (slopeAngle != collisionInfo.slopeAngle)
                     {
                         velocity.x = (hit.distance - skinWidth) * directionX;
-                        _collisionInfo.slopeAngle = slopeAngle;
+                        collisionInfo.slopeAngle = slopeAngle;
                     }
                 }
 
@@ -209,16 +213,16 @@ namespace Project.Physics
             {
                 velocity.y = climbVelocityY;
                 velocity.x = Mathf.Cos(slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign(velocity.x);
-                _collisionInfo.below = true;
-                _collisionInfo.climbingSlope = true;
-                _collisionInfo.slopeAngle = slopeAngle;
+                collisionInfo.below = true;
+                collisionInfo.climbingSlope = true;
+                collisionInfo.slopeAngle = slopeAngle;
             }
         }
 
         private void DescendSlope(ref Vector3 velocity)
         {
-            float directionX = _collisionInfo.isFacingRight ? 1.0f : -1.0f;
-            Vector2 rayOrigin = _collisionInfo.isFacingRight ? raycastController.rayOrigins.bottomLeft : raycastController.rayOrigins.bottomRight;
+            float directionX = collisionInfo.isFacingRight ? 1.0f : -1.0f;
+            Vector2 rayOrigin = collisionInfo.isFacingRight ? raycastController.rayOrigins.bottomLeft : raycastController.rayOrigins.bottomRight;
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
 
             if (hit)
@@ -234,9 +238,9 @@ namespace Project.Physics
                     velocity.x = Mathf.Cos(slopeAngle * Mathf.Deg2Rad) * moveDistance * directionX;
                     velocity.y -= descendVelocityY;
 
-                    _collisionInfo.slopeAngle = slopeAngle;
-                    _collisionInfo.descendingSlope = true;
-                    _collisionInfo.below = true;
+                    collisionInfo.slopeAngle = slopeAngle;
+                    collisionInfo.descendingSlope = true;
+                    collisionInfo.below = true;
                 }
             }
         }
