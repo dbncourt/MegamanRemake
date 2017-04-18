@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using PlayerController.InputController;
 using Megaman.Constants;
+using Project.Physics;
 using UnityEngine;
 
+[RequireComponent (typeof(Animator), typeof(SpriteRenderer), typeof(PlayerInputController)) ]
 public class MegamanCharacterMovementController : CharacterMovementController
 {
     private Animator animator;
     private SpriteRenderer spriteRenderer;
+    private PlayerInputController playerInputController;
 
     private bool isCrouching;
     private bool isDashing;
@@ -23,26 +26,12 @@ public class MegamanCharacterMovementController : CharacterMovementController
     {
         base.Start();
         animator = GetComponent<Animator>();
-        if (animator == null)
-        {
-            Debug.LogError("Animator not found");
-        }
+        animator.speed = 0.0f;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null)
-        {
-            Debug.LogError("SpriteRenderer not found");
-        }
 
-        animator.speed = 0.0f;
-        PlayerInputController playerInputController = GetComponent<PlayerInputController>();
-        if(playerInputController != null)
-        {
-            playerInputController.enabled = false;
-        } else
-        {
-            Debug.LogError("PlayerInputController not found");
-        }
+        playerInputController = GetComponent<PlayerInputController>();
+        playerInputController.enabled = false;
     }
 
     private new void Update()
@@ -162,7 +151,6 @@ public class MegamanCharacterMovementController : CharacterMovementController
 
     public void NotifySpawnEnd()
     {
-        PlayerInputController playerInputController = GetComponent<PlayerInputController>();
         playerInputController.enabled = true;
     }
 }
