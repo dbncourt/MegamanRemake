@@ -46,7 +46,7 @@ namespace Project.Physics
         protected Vector2 input;
         protected CharacterAction characterStatus;
 
-        public CharacterMovementController()
+        public CharacterMovementController() : base()
         {
             jumpHeight = 1.0f;
             timeToJumpApex = 0.4f;
@@ -177,6 +177,7 @@ namespace Project.Physics
         protected void StopJumping()
         {
             characterStatus.isJumpPressed = false;
+            timeJumping = float.MaxValue;
         }
 
         protected virtual void OnFalling()
