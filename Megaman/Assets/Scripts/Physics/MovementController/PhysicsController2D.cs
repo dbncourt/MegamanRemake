@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Project.Physics
 {
@@ -103,8 +100,8 @@ namespace Project.Physics
 
             for (int i = 0; i < horizontalRayCount; i++)
             {
-                Vector2 rayOrigin = (collisionInfo.isFacingRight) ? raycastController.rayOrigins.bottomRight : raycastController.rayOrigins.bottomLeft;
-                rayOrigin += Vector2.up * (raycastController.horizontalRaySpacing * i);
+                Vector2 rayOrigin = (collisionInfo.isFacingRight) ? raycastController.RayOrigins.bottomRight : raycastController.RayOrigins.bottomLeft;
+                rayOrigin += Vector2.up * (raycastController.HorizontalRaySpacing * i);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
 
                 Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.red);
@@ -161,8 +158,8 @@ namespace Project.Physics
             for (int i = 0; i < verticalRayCount; i++)
             {
 
-                Vector2 rayOrigin = (directionY == -1) ? raycastController.rayOrigins.bottomLeft : raycastController.rayOrigins.topLeft;
-                rayOrigin += Vector2.right * (raycastController.verticalRaySpacing * i + velocity.x);
+                Vector2 rayOrigin = (directionY == -1) ? raycastController.RayOrigins.bottomLeft : raycastController.RayOrigins.topLeft;
+                rayOrigin += Vector2.right * (raycastController.VerticalRaySpacing * i + velocity.x);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
 
                 Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
@@ -187,7 +184,7 @@ namespace Project.Physics
             {
                 float directionX = Mathf.Sign(velocity.x);
                 rayLength = Mathf.Abs(velocity.x) + skinWidth;
-                Vector2 rayOrigin = ((directionX == -1) ? raycastController.rayOrigins.bottomLeft : raycastController.rayOrigins.bottomRight) + Vector2.up * velocity.y;
+                Vector2 rayOrigin = ((directionX == -1) ? raycastController.RayOrigins.bottomLeft : raycastController.RayOrigins.bottomRight) + Vector2.up * velocity.y;
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
 
                 if (hit)
@@ -222,7 +219,7 @@ namespace Project.Physics
         private void DescendSlope(ref Vector3 velocity)
         {
             float directionX = collisionInfo.isFacingRight ? 1.0f : -1.0f;
-            Vector2 rayOrigin = collisionInfo.isFacingRight ? raycastController.rayOrigins.bottomLeft : raycastController.rayOrigins.bottomRight;
+            Vector2 rayOrigin = collisionInfo.isFacingRight ? raycastController.RayOrigins.bottomLeft : raycastController.RayOrigins.bottomRight;
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
 
             if (hit)

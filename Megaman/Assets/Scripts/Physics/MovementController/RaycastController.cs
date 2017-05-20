@@ -11,27 +11,15 @@ namespace Project.Physics
             public Vector2 bottomLeft;
             public Vector2 bottomRight;
         }
-        public float horizontalRaySpacing
-        {
-            get { return _horizontalRaySpacing; }
-        }
-        public float verticalRaySpacing
-        {
-            get { return _verticalRaySpacing; }
-        }
-        public RaycastOrigins rayOrigins
-        {
-            get { return _rayOrigins; }
-        }
+        public float HorizontalRaySpacing {get; set;}
+        public float VerticalRaySpacing { get; set;}
+        public RaycastOrigins RayOrigins { get; set; }
 
         private BoxCollider2D boxCollider;
 
         private float skinWidth;
         private int horizontalRayCount;
         private int verticalRayCount;
-        private float _horizontalRaySpacing;
-        private float _verticalRaySpacing;
-        private RaycastOrigins _rayOrigins;
 
         public RaycastController(ref BoxCollider2D boxCollider, float skinWidth, ref int horizontalRayCount, ref int verticalRayCount)
         {
@@ -48,8 +36,8 @@ namespace Project.Physics
             Bounds bounds = boxCollider.bounds;
             bounds.Expand(skinWidth * -2);
 
-            _horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
-            _verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
+            HorizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
+            VerticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
         }
 
         public void UpdateRaycastOrigins()
@@ -57,10 +45,14 @@ namespace Project.Physics
             Bounds bounds = boxCollider.bounds;
             bounds.Expand(skinWidth * -2);
 
-            _rayOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-            _rayOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-            _rayOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-            _rayOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
+            RaycastOrigins rayOrigins = new RaycastOrigins()
+            {
+                bottomLeft = new Vector2(bounds.min.x, bounds.min.y),
+                bottomRight = new Vector2(bounds.max.x, bounds.min.y),
+                topLeft = new Vector2(bounds.min.x, bounds.max.y),
+                topRight = new Vector2(bounds.max.x, bounds.max.y)
+            };
+            RayOrigins = rayOrigins;
         }
     }
 }

@@ -34,6 +34,6 @@ namespace Project.Physics
 			base.FixedUpdate ();
 		}
 
-		protected abstract void SetupPlayerInputController (ref PlayerInputController playerInputController);
+        protected abstract void SetupPlayerInputController (ref PlayerInputController playerInputController);
 	}
 }

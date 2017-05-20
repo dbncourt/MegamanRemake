@@ -6,9 +6,11 @@ namespace Project.Physics
     {
         protected struct CharacterAction
         {
-            public bool isJumpDown { get; set; }
-            public bool isJumpPressed { get; set; }
-            public bool isWallSliding { get; set; }
+            public bool IsJumpDown { get; set; }
+            public bool IsJumpPressed { get; set; }
+            public bool IsWallSliding { get; set; }
+            public bool IsFalling { get; set; }
+            public bool IsLanded { get; set; }
         }
 
         [SerializeField]
@@ -19,6 +21,8 @@ namespace Project.Physics
         private float accelerationTimeAirbone;
         [SerializeField]
         private float accelerationTimeGrounded;
+        [SerializeField]
+        private float speed;
         [SerializeField]
         private float moveSpeed;
         [SerializeField]
@@ -40,11 +44,40 @@ namespace Project.Physics
         private float gravity;
         private float jumpVelocity;
         private float velocityXSmoothing;
+        private bool isLanded;
+        private bool isFalling;
+
 
         private Vector3 velocity;
 
         protected Vector2 input;
         protected CharacterAction characterStatus;
+
+        public float Speed
+        {
+            get
+            {
+                return speed;
+            }
+
+            set
+            {
+                speed = value;
+            }
+        }
+
+        public float MoveSpeed
+        {
+            get
+            {
+                return moveSpeed;
+            }
+
+            set
+            {
+                moveSpeed = value;
+            }
+        }
 
         public CharacterMovementController() : base()
         {
@@ -53,6 +86,7 @@ namespace Project.Physics
             accelerationTimeAirbone = 0.2f;
             accelerationTimeGrounded = 0.1f;
             moveSpeed = 6.0f;
+            speed = moveSpeed;
             wallSlideSpeedMax = 3.0f;
             wallStickTime = 0.25f;
             maxTimeJump = 0.2f;
@@ -61,6 +95,7 @@ namespace Project.Physics
             wallJumpOff = new Vector2(8.5f, 7.0f);
             wallLeap = new Vector2(18.0f, 17.0f);
             maxTimeJump = 0.2f;
+            isLanded = true;
         }
 
         protected new void Start()
@@ -75,13 +110,13 @@ namespace Project.Physics
         {
             int wallDirectionX = (collisionInfo.left) ? -1 : 1;
 
-            float targetVelocityX = input.x * moveSpeed;
+            float targetVelocityX = input.x * speed;
             velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (collisionInfo.below ? accelerationTimeGrounded : accelerationTimeAirbone));
 
-            characterStatus.isWallSliding = false;
+            characterStatus.IsWallSliding = false;
             if ((collisionInfo.left || collisionInfo.right) && !collisionInfo.below && velocity.y < 0.0f)
             {
-                characterStatus.isWallSliding = true;
+                characterStatus.IsWallSliding = true;
                 if (velocity.y < -wallSlideSpeedMax)
                 {
                     velocity.y = -wallSlideSpeedMax;
@@ -108,10 +143,10 @@ namespace Project.Physics
                 velocity.y = 0.0f;
             }
 
-            if (characterStatus.isJumpDown)
+            if (characterStatus.IsJumpDown)
             {
-                characterStatus.isJumpDown = false;
-                if (characterStatus.isWallSliding)
+                characterStatus.IsJumpDown = false;
+                if (characterStatus.IsWallSliding)
                 {
                     if (wallDirectionX == input.x)
                     {
@@ -136,7 +171,7 @@ namespace Project.Physics
                     }
                 }
             }
-            else if (characterStatus.isJumpPressed && timeJumping <= maxTimeJump)
+            else if (characterStatus.IsJumpPressed && timeJumping <= maxTimeJump)
             {
                 velocity.y = jumpVelocity;
                 timeJumping += Time.deltaTime;
@@ -147,36 +182,46 @@ namespace Project.Physics
 
         protected void Update()
         {
-
+            if (!isFalling && velocity.y < -0.45f)
+            {
+                isFalling = true;
+                OnFalling();
+            }
+            if (!isLanded && collisionInfo.below)
+            {
+                isFalling = false;
+                OnLanded();
+            }
+            isLanded = collisionInfo.below;
         }
 
         protected virtual void OnLanded()
         {
         }
 
-        protected void MoveHorizontally(float value)
+        protected virtual void MoveHorizontally(float value)
         {
             input.x = value;
             input.y = 0.0f;
         }
 
-        protected void Jump()
+        protected virtual void Jump()
         {
-            characterStatus.isJumpDown = true;
+            characterStatus.IsJumpDown = true;
             if (collisionInfo.below)
             {
                 timeJumping = 0.0f;
             }
         }
 
-        protected void JumpPressed()
+        protected virtual void JumpPressed()
         {
-            characterStatus.isJumpPressed = true;
+            characterStatus.IsJumpPressed = true;
         }
 
-        protected void StopJumping()
+        protected virtual void StopJumping()
         {
-            characterStatus.isJumpPressed = false;
+            characterStatus.IsJumpPressed = false;
             timeJumping = float.MaxValue;
         }
 
@@ -192,6 +237,16 @@ namespace Project.Physics
         private static float CalculateJumpVelocity(float gravity, float timeToJumpApex)
         {
             return Mathf.Abs(gravity) * timeToJumpApex;
+        }
+
+        public bool IsCharacterLanded()
+        {
+            return collisionInfo.below;
+        }
+
+        public bool IsCharacterFalling()
+        {
+            return isFalling;
         }
     }
 }

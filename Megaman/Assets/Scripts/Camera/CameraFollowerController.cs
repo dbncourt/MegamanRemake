@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Project.Constants;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CameraFollowerController : MonoBehaviour
 {
