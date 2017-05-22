@@ -152,7 +152,6 @@ public class MegamanPlayerController : PlayerCharacter2D
 
     protected override void OnFalling()
     {
-        Debug.Log("Falling");
         base.OnFalling();
         if (!IsSpawning)
         {
@@ -161,6 +160,7 @@ public class MegamanPlayerController : PlayerCharacter2D
         if (IsDashing)
         {
             Speed = 0.0f;
+            IsDashing = false;
         }
     }
 
@@ -200,4 +200,9 @@ public class MegamanPlayerController : PlayerCharacter2D
     }
 
     private bool IsSpawning { get; set; }
+
+    private void NotifyDashToIdleStopStart()
+    {
+        IsDashing = false;
+    }
 }
