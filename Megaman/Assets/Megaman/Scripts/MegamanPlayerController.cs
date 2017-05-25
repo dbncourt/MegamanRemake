@@ -10,13 +10,22 @@ public class MegamanPlayerController : PlayerCharacter2D
     private bool isCrouching;
     private bool isDashing;
     private bool isWalking;
+    private bool isHittingWallRight;
+    private bool isHittingWallLeft;
+    private bool isJumpReachedAir;
+    private bool isJumping;
 
     public MegamanPlayerController() : base()
     {
+        isJumping = false;
+        isJumpReachedAir = true;
+        dashSpeed = 2.0f;
         IsSpawning = true;
         isCrouching = false;
         isDashing = false;
         isWalking = false;
+        isHittingWallRight = false;
+        isHittingWallLeft = false;
     }
 
     private new void Start()
@@ -37,7 +46,25 @@ public class MegamanPlayerController : PlayerCharacter2D
 
     private void CheckMegamanIsGrounded()
     {
-        animator.SetBool(AnimatorConditionConstant.IS_GROUNDED, IsCharacterLanded());
+        if (isJumping && isJumpReachedAir)
+        {
+            isJumpReachedAir = false;
+        }
+        else if (!IsCharacterLanded())
+        {
+            isJumpReachedAir = true;
+            isJumping = false;
+        }
+
+        if (!isJumpReachedAir)
+        {
+            animator.SetBool(AnimatorConditionConstant.IS_GROUNDED, false);
+        }
+        else
+        {
+            isJumpReachedAir = true;
+            animator.SetBool(AnimatorConditionConstant.IS_GROUNDED, IsCharacterLanded());
+        }
     }
 
     private void CheckMegamanDashingInterrupted(float value)
@@ -74,10 +101,15 @@ public class MegamanPlayerController : PlayerCharacter2D
 
     protected override void MoveHorizontally(float value)
     {
+
+        FlipSprite(value);
         isWalking = value != 0.0f;
         CheckMegamanDashingInterrupted(value);
-        FlipSprite(value);
-        if (IsDashing)
+        if (IsCharacterLanded() && (value < 0.0f && isHittingWallLeft || value > 0.0f && isHittingWallRight))
+        {
+            value = 0.0f;
+        }
+        else if (IsDashing)
         {
             value = spriteRenderer.flipX ? -1.0f : 1.0f;
         }
@@ -114,6 +146,8 @@ public class MegamanPlayerController : PlayerCharacter2D
         if (IsCharacterLanded())
         {
             animator.SetTrigger(AnimatorConditionConstant.JUMP);
+            isJumping = true;
+            isJumpReachedAir = false;
         }
         IsDashing = false;
     }
@@ -139,15 +173,43 @@ public class MegamanPlayerController : PlayerCharacter2D
         IsDashing = false;
     }
 
-    protected override void OnLanded()
+    protected override void BelowCollisionEnter()
     {
-        base.OnLanded();
+        base.BelowCollisionEnter();
 
         if (IsSpawning)
         {
             animator.speed = 1.0f;
         }
         animator.SetBool(AnimatorConditionConstant.IS_GROUNDED, true);
+    }
+
+    protected override void RightCollisionEnter()
+    {
+        base.RightCollisionEnter();
+        isHittingWallRight = true;
+        animator.SetBool(AnimatorConditionConstant.WALL_SLIDE, true);
+    }
+
+    protected override void RightCollisionExit()
+    {
+        base.RightCollisionExit();
+        isHittingWallRight = false;
+        animator.SetBool(AnimatorConditionConstant.WALL_SLIDE, false);
+    }
+
+    protected override void LeftCollisionEnter()
+    {
+        base.LeftCollisionEnter();
+        isHittingWallLeft = true;
+        animator.SetBool(AnimatorConditionConstant.WALL_SLIDE, true);
+    }
+
+    protected override void LeftCollisionExit()
+    {
+        base.LeftCollisionExit();
+        isHittingWallLeft = false;
+        animator.SetBool(AnimatorConditionConstant.WALL_SLIDE, false);
     }
 
     protected override void OnFalling()

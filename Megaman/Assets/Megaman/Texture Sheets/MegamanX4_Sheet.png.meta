@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 1dcd7983a07bd7a4a9cb65b86c165d5e
-timeCreated: 1491922856
+timeCreated: 1495498134
 licenseType: Pro
 TextureImporter:
   fileIDToRecycleName:
@@ -147,10 +147,10 @@ TextureImporter:
     21300280: MegamanX4_Sheet_140
     21300282: MegamanX4_Sheet_141
     21300284: MegamanX4_Sheet_142
-    21300286: MegamanX4_Sheet_143
-    21300288: MegamanX4_Sheet_144
-    21300290: MegamanX4_Sheet_145
-    21300292: MegamanX4_Sheet_146
+    21300286: WallSlide_1
+    21300288: WallSlide_2
+    21300290: WallSlide_3
+    21300292: WallSlide_4
     21300294: MegamanX4_Sheet_147
     21300296: MegamanX4_Sheet_148
     21300298: MegamanX4_Sheet_149
@@ -2141,7 +2141,7 @@ TextureImporter:
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: MegamanX4_Sheet_143
+      name: WallSlide_1
       rect:
         serializedVersion: 2
         x: 67
@@ -2154,7 +2154,7 @@ TextureImporter:
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: MegamanX4_Sheet_144
+      name: WallSlide_2
       rect:
         serializedVersion: 2
         x: 104
@@ -2167,7 +2167,7 @@ TextureImporter:
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: MegamanX4_Sheet_145
+      name: WallSlide_3
       rect:
         serializedVersion: 2
         x: 147
@@ -2180,7 +2180,7 @@ TextureImporter:
       outline: []
       tessellationDetail: -1
     - serializedVersion: 2
-      name: MegamanX4_Sheet_146
+      name: WallSlide_4
       rect:
         serializedVersion: 2
         x: 189

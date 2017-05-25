@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Project.Physics
 {
     public class CharacterMovementController : PhysicsController2D
     {
-        protected struct CharacterAction
+        private struct CharacterAction
         {
             public bool IsJumpDown { get; set; }
             public bool IsJumpPressed { get; set; }
@@ -44,14 +45,13 @@ namespace Project.Physics
         private float gravity;
         private float jumpVelocity;
         private float velocityXSmoothing;
-        private bool isLanded;
         private bool isFalling;
-
+        private CollisionInfo previousFrameCollisionInfo;
 
         private Vector3 velocity;
 
-        protected Vector2 input;
-        protected CharacterAction characterStatus;
+        private Vector2 input;
+        private CharacterAction characterStatus;
 
         public float Speed
         {
@@ -88,14 +88,14 @@ namespace Project.Physics
             moveSpeed = 6.0f;
             speed = moveSpeed;
             wallSlideSpeedMax = 3.0f;
-            wallStickTime = 0.25f;
+            wallStickTime = 0.0f;
+            timeToWallUnstick = wallStickTime;
             maxTimeJump = 0.2f;
             timeJumping = 0.0f;
             wallJumpClimb = new Vector2(7.5f, 16.0f);
             wallJumpOff = new Vector2(8.5f, 7.0f);
             wallLeap = new Vector2(18.0f, 17.0f);
             maxTimeJump = 0.2f;
-            isLanded = true;
         }
 
         protected new void Start()
@@ -122,19 +122,12 @@ namespace Project.Physics
                     velocity.y = -wallSlideSpeedMax;
                 }
 
-                if (timeToWallUnstick > 0.0f)
-                {
-                    velocityXSmoothing = 0.0f;
-                    velocity.x = 0.0f;
+                int inputDirection = input.x > 0.0f ? 1 : -1;
 
-                    if (input.x != wallDirectionX && input.x != 0.0f)
-                    {
-                        timeToWallUnstick -= Time.deltaTime;
-                    }
-                    else
-                    {
-                        timeToWallUnstick = wallStickTime;
-                    }
+                if (inputDirection != wallDirectionX && input.x != 0.0f)
+                {
+                    velocity.x = -wallDirectionX * wallLeap.x;
+                    velocity.y = wallLeap.y;
                 }
             }
 
@@ -176,26 +169,93 @@ namespace Project.Physics
                 velocity.y = jumpVelocity;
                 timeJumping += Time.deltaTime;
             }
-            velocity.y += gravity * Time.deltaTime;
-            Move(velocity * Time.deltaTime);
-        }
-
-        protected void Update()
-        {
             if (!isFalling && velocity.y < -0.45f)
             {
                 isFalling = true;
                 OnFalling();
             }
-            if (!isLanded && collisionInfo.below)
-            {
-                isFalling = false;
-                OnLanded();
-            }
-            isLanded = collisionInfo.below;
+            TriggerCollisionStateChangesEvents();
+            velocity.y += gravity * Time.deltaTime;
+            Move(velocity * Time.deltaTime);
         }
 
-        protected virtual void OnLanded()
+        private void TriggerCollisionStateChangesEvents()
+        {
+            if (!previousFrameCollisionInfo.below && collisionInfo.below)
+            {
+                isFalling = false;
+                BelowCollisionEnter();
+            }
+            else if (!collisionInfo.below && previousFrameCollisionInfo.below)
+            {
+                BelowCollisionExit();
+            }
+
+            if (!previousFrameCollisionInfo.above && collisionInfo.above)
+            {
+                AboveCollisionEnter();
+            }
+            else if (!collisionInfo.above && previousFrameCollisionInfo.above)
+            {
+                AboveCollisionExit();
+            }
+            if (!previousFrameCollisionInfo.right && collisionInfo.right)
+            {
+                RightCollisionEnter();
+            }
+            else if (!collisionInfo.right && previousFrameCollisionInfo.right)
+            {
+                RightCollisionExit();
+            }
+            if (!previousFrameCollisionInfo.left && collisionInfo.left)
+            {
+                LeftCollisionEnter();
+            }
+            else if (!collisionInfo.left && previousFrameCollisionInfo.left)
+            {
+                LeftCollisionExit();
+            }
+            SetPreviousFrameValues();
+        }
+
+        private void SetPreviousFrameValues()
+        {
+            previousFrameCollisionInfo = collisionInfo;
+        }
+
+        protected void Update()
+        {
+        }
+
+        protected virtual void BelowCollisionEnter()
+        {
+        }
+
+        protected virtual void BelowCollisionExit()
+        {
+        }
+
+        protected virtual void AboveCollisionEnter()
+        {
+        }
+
+        protected virtual void AboveCollisionExit()
+        {
+        }
+
+        protected virtual void RightCollisionEnter()
+        {
+        }
+
+        protected virtual void RightCollisionExit()
+        {
+        }
+
+        protected virtual void LeftCollisionEnter()
+        {
+        }
+
+        protected virtual void LeftCollisionExit()
         {
         }
 

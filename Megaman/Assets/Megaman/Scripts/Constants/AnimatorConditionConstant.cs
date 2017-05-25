@@ -9,5 +9,6 @@
         public static readonly string IS_GROUNDED = "IsGrounded";
         public static readonly string FALL = "Fall";
         public static readonly string JUMP = "Jump";
+        public static readonly string WALL_SLIDE = "WallSlide";
     }
 }
